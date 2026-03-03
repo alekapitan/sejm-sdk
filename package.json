@@ -1,0 +1,34 @@
+{
+  "name": "sejm-sdk",
+  "version": "0.0.1",
+  "description": "Modern TypeScript SDK for the Polish Sejm API.",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -w -p tsconfig.json",
+    "generate:sejm-types": "openapi-typescript ./openapi/patched.yml --output ./src/gen/openapi.ts"
+  },
+  "engines": {
+    "node": ">=24.14.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.0.2",
+    "globals": "^17.3.0",
+    "openapi-typescript": "^7.13.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.1"
+  }
+}
