@@ -57,6 +57,7 @@ describe("createMPsResource", () => {
 
       const result = await mps.getAll();
 
+      expect(http.getResource).toHaveBeenCalledOnce();
       expect(http.getResource).toHaveBeenCalledWith(MP_URL, undefined);
 
       expect(result).toHaveLength(2);
@@ -71,6 +72,7 @@ describe("createMPsResource", () => {
 
       await mps.getAll(options);
 
+      expect(http.getResource).toHaveBeenCalledOnce();
       expect(http.getResource).toHaveBeenCalledWith(MP_URL, options);
     });
   });
@@ -85,16 +87,6 @@ describe("createMPsResource", () => {
       expect(http.getResource).toHaveBeenCalledWith(`${MP_URL}/95`, undefined);
       expect(result.id).toBe(95);
       expect(result.firstLastName).toBe("Anna Kowalska");
-    });
-
-    it("forwards options to http client", async () => {
-      const http = createMockHttp(mockMPs[0]);
-      const mps = createMPsResource(http);
-      const options = { query: { lang: "pl" } };
-
-      await mps.getById(56, options);
-
-      expect(http.getResource).toHaveBeenCalledWith(`${MP_URL}/56`, options);
     });
   });
 });

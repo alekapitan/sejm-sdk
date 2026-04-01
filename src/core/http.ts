@@ -1,13 +1,12 @@
-export type QueryParams = Record<string, string | number | boolean | undefined>;
+type QueryParams = Record<string, string | number | boolean | undefined>;
 
-export type RequestOptions = {
-  query?: QueryParams;
+export type RequestOptions<TQuery = never> = {
   headers?: HeadersInit;
   signal?: AbortSignal;
-};
+} & ([TQuery] extends [never] ? { query?: never } : { query?: TQuery });
 
 export type HttpClient = {
-  getResource: <T>(url: string, options?: RequestOptions) => Promise<T>;
+  getResource: <T>(url: string, options?: RequestOptions<QueryParams>) => Promise<T>;
 };
 
 const appendQueryParams = (url: string, query: QueryParams): string => {
@@ -16,10 +15,10 @@ const appendQueryParams = (url: string, query: QueryParams): string => {
     if (value != null) u.searchParams.set(key, String(value));
   });
   return u.toString();
-}; 
+};
 
 export const createHttpClient = (): HttpClient => {
-  const getResource = async <T>(url: string, options?: RequestOptions): Promise<T> => {
+  const getResource = async <T>(url: string, options?: RequestOptions<QueryParams>): Promise<T> => {
     const finalUrl = options?.query ? appendQueryParams(url, options.query) : url;
 
     const response = await fetch(finalUrl, {
@@ -32,7 +31,7 @@ export const createHttpClient = (): HttpClient => {
     });
 
     const contentType = response.headers.get("content-type") ?? "";
-    const body: unknown = contentType.includes("application/json")
+    const body: unknown = contentType.includes("application/json") 
       ? await response.json()
       : await response.text();
 
