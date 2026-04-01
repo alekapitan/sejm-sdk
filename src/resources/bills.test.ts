@@ -1,6 +1,5 @@
 import { createBillsResource, type Bill } from "./bills.js";
 import type { HttpClient } from "../core/http.js";
-import { BILLS_URL } from "../core/constants.js";
 
 const mockBills: Bill[] = [
   {
@@ -32,7 +31,7 @@ describe("createBillsResource", () => {
       const result = await bills.getAll();
 
       expect(http.getResource).toHaveBeenCalledOnce();
-      expect(http.getResource).toHaveBeenCalledWith(BILLS_URL, undefined);
+      expect(http.getResource).toHaveBeenCalledWith("bills", undefined);
 
       expect(result).toHaveLength(2);
       expect(result[0].number).toBe("RPW/1/2026");
@@ -47,7 +46,7 @@ describe("createBillsResource", () => {
       await bills.getAll(options);
 
       expect(http.getResource).toHaveBeenCalledOnce();
-      expect(http.getResource).toHaveBeenCalledWith(BILLS_URL, options);
+      expect(http.getResource).toHaveBeenCalledWith("bills", options);
     });
 
     it("forwards query in options to http client", async () => {
@@ -60,7 +59,7 @@ describe("createBillsResource", () => {
       await bills.getAll(options);
 
       expect(http.getResource).toHaveBeenCalledOnce();
-      expect(http.getResource).toHaveBeenCalledWith(BILLS_URL, options);
+      expect(http.getResource).toHaveBeenCalledWith("bills", options);
     });
   });
 });

@@ -1,6 +1,5 @@
 import { createClubsResource } from "./clubs.js";
 import type { HttpClient } from "../core/http.js";
-import { CLUB_URL } from "../core/constants.js";
 
 const mockClubs = [
   {
@@ -35,7 +34,7 @@ describe("createClubsResource", () => {
 
       const result = await clubs.getAll();
 
-      expect(http.getResource).toHaveBeenCalledWith(CLUB_URL, undefined);
+      expect(http.getResource).toHaveBeenCalledWith("clubs", undefined);
       expect(result).toHaveLength(2);
       expect(result[0].id).toBe("KPT");
       expect(result[1].id).toBe("KT");
@@ -48,7 +47,7 @@ describe("createClubsResource", () => {
 
       await clubs.getAll(options);
 
-      expect(http.getResource).toHaveBeenCalledWith(CLUB_URL, options);
+      expect(http.getResource).toHaveBeenCalledWith("clubs", options);
     });
   });
 
@@ -59,7 +58,7 @@ describe("createClubsResource", () => {
 
       const result = await clubs.getById("KT");
 
-      expect(http.getResource).toHaveBeenCalledWith(`${CLUB_URL}/KT`, undefined);
+      expect(http.getResource).toHaveBeenCalledWith("clubs/KT", undefined);
       expect(result.id).toBe("KT");
       expect(result.membersCount).toBe(222);
     });

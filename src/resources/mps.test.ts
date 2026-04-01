@@ -1,6 +1,5 @@
 import { createMPsResource, MP } from "./mps.js";
 import type { HttpClient } from "../core/http.js";
-import { MP_URL } from "../core/constants.js";
 
 const mockMPs: MP[] = [
   {
@@ -58,7 +57,7 @@ describe("createMPsResource", () => {
       const result = await mps.getAll();
 
       expect(http.getResource).toHaveBeenCalledOnce();
-      expect(http.getResource).toHaveBeenCalledWith(MP_URL, undefined);
+      expect(http.getResource).toHaveBeenCalledWith("MP", undefined);
 
       expect(result).toHaveLength(2);
       expect(result[0].id).toBe(95);
@@ -73,7 +72,7 @@ describe("createMPsResource", () => {
       await mps.getAll(options);
 
       expect(http.getResource).toHaveBeenCalledOnce();
-      expect(http.getResource).toHaveBeenCalledWith(MP_URL, options);
+      expect(http.getResource).toHaveBeenCalledWith("MP", options);
     });
   });
 
@@ -84,7 +83,7 @@ describe("createMPsResource", () => {
 
       const result = await mps.getById(95);
 
-      expect(http.getResource).toHaveBeenCalledWith(`${MP_URL}/95`, undefined);
+      expect(http.getResource).toHaveBeenCalledWith("MP/95", undefined);
       expect(result.id).toBe(95);
       expect(result.firstLastName).toBe("Anna Kowalska");
     });

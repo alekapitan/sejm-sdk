@@ -1,25 +1,29 @@
+import type { ClientConfig, RequestOptions } from "./types.js";
+
 type QueryParams = Record<string, string | number | boolean | undefined>;
 
-export type RequestOptions<TQuery = never> = {
-  headers?: HeadersInit;
-  signal?: AbortSignal;
-} & ([TQuery] extends [never] ? { query?: never } : { query?: TQuery });
-
 export type HttpClient = {
-  getResource: <T>(url: string, options?: RequestOptions<QueryParams>) => Promise<T>;
+  getResource: <T>(path: string, options?: RequestOptions<QueryParams>) => Promise<T>;
 };
 
-const appendQueryParams = (url: string, query: QueryParams): string => {
-  const u = new URL(url);
+const appendQueryParams = (url: URL, query: QueryParams): string => {
   Object.entries(query).forEach(([key, value]) => {
-    if (value != null) u.searchParams.set(key, String(value));
+    if (value != null) url.searchParams.set(key, String(value));
   });
-  return u.toString();
+  return url.toString();
 };
 
-export const createHttpClient = (): HttpClient => {
-  const getResource = async <T>(url: string, options?: RequestOptions<QueryParams>): Promise<T> => {
-    const finalUrl = options?.query ? appendQueryParams(url, options.query) : url;
+export const createHttpClient = (config: ClientConfig): HttpClient => {
+  const baseUrl = new URL(config.baseUrl);
+  if (!baseUrl.pathname.endsWith("/")) {
+    baseUrl.pathname += "/";
+  }
+
+  const termUrl = new URL(`term${config.term}/`, baseUrl);
+
+  const getResource = async <T>(path: string, options?: RequestOptions<QueryParams>): Promise<T> => {
+    const url = new URL(path, termUrl);
+    const finalUrl = options?.query ? appendQueryParams(url, options.query) : url.href;
 
     const response = await fetch(finalUrl, {
       method: "GET",
@@ -31,9 +35,7 @@ export const createHttpClient = (): HttpClient => {
     });
 
     const contentType = response.headers.get("content-type") ?? "";
-    const body: unknown = contentType.includes("application/json") 
-      ? await response.json()
-      : await response.text();
+    const body: unknown = contentType.includes("application/json") ? await response.json() : await response.text();
 
     if (!response.ok) {
       throw new Error(`Request ${finalUrl} failed with status ${response.status}`);
