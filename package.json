@@ -22,7 +22,7 @@
     "generate:sejm-types": "openapi-typescript ./openapi/patched.yml --output ./src/gen/openapi.ts"
   },
   "engines": {
-    "node": ">=24.14.0"
+    "node": ">=20"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
