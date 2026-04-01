@@ -23,12 +23,12 @@ const createMockHttp = (returnValue: unknown): HttpClient => ({
 describe("createBillsResource", () => {
   afterEach(() => vi.resetAllMocks());
 
-  describe("getAll", () => {
-    it("returns list of bills", async () => {
+  describe("list", () => {
+    it("returns one page of bills", async () => {
       const http = createMockHttp(mockBills);
       const bills = createBillsResource(http);
 
-      const result = await bills.getAll();
+      const result = await bills.list();
 
       expect(http.getResource).toHaveBeenCalledOnce();
       expect(http.getResource).toHaveBeenCalledWith("bills", undefined);
@@ -43,7 +43,7 @@ describe("createBillsResource", () => {
       const bills = createBillsResource(http);
       const options = { signal: new AbortController().signal };
 
-      await bills.getAll(options);
+      await bills.list(options);
 
       expect(http.getResource).toHaveBeenCalledOnce();
       expect(http.getResource).toHaveBeenCalledWith("bills", options);
@@ -56,7 +56,7 @@ describe("createBillsResource", () => {
         query: { limit: 10, status: "ACTIVE" as const, title: "podatku" },
       };
 
-      await bills.getAll(options);
+      await bills.list(options);
 
       expect(http.getResource).toHaveBeenCalledOnce();
       expect(http.getResource).toHaveBeenCalledWith("bills", options);

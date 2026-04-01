@@ -7,15 +7,17 @@ export type Bill = components["schemas"]["Bill"];
 export type BillsOptions = RequestOptions<QueryParamsDynamic<"/sejm/term{term}/bills">>;
 
 export type BillsResource = {
-  getAll: (options?: BillsOptions) => Promise<Bill[]>;
+  /**
+   * Returns a paginated list of bills.
+   * Use `limit` and `offset` to control pagination.
+   */
+  list: (options?: BillsOptions) => Promise<Bill[]>;
 };
 
 export const createBillsResource = (http: HttpClient): BillsResource => {
-  const getAll: BillsResource["getAll"] = (options) => {
+  const list: BillsResource["list"] = (options) => {
     return http.getResource<Bill[]>("bills", options);
   };
 
-  return {
-    getAll,
-  };
+  return { list };
 };
