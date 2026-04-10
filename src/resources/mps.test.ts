@@ -1,5 +1,5 @@
 import { createMPsResource } from "./mps.js";
-import type { MP, VotingStat } from "./mps.js";
+import type { MP, VoteMP, VotingStat } from "./mps.js";
 import type { HttpClient } from "../core/http.js";
 
 const mockMPs: MP[] = [
@@ -46,6 +46,11 @@ const mockMPs: MP[] = [
 const mockVotingStats: VotingStat[] = [
   { sitting: 1, date: "2024-01-15", numVotings: 20, numVoted: 18, numMissed: 2, absenceExcuse: false },
   { sitting: 2, date: "2024-02-10", numVotings: 15, numVoted: 15, numMissed: 0, absenceExcuse: false },
+];
+
+const mockVotesMp: VoteMP[] = [
+  { vote: "YES" },
+  { vote: "NO" },
 ];
 
 const createMockHttp = (returnValue: unknown): HttpClient => ({
@@ -126,6 +131,37 @@ describe("createMPsResource", () => {
       await mps.getVotingsStatistics(95, options);
 
       expect(http.getResource).toHaveBeenCalledWith("MP/95/votings/stats", options);
+    });
+  });
+
+  describe("getVotingsBySittingAndDate", () => {
+    it("returns votes for an MP by sitting and date", async () => {
+      const http = createMockHttp(mockVotesMp);
+      const mps = createMPsResource(http);
+
+      const result = await mps.getVotingsBySittingAndDate(95, 1, "2023-12-13");
+
+      expect(http.getResource).toHaveBeenCalledOnce();
+      expect(http.getResource).toHaveBeenCalledWith(
+        "MP/95/votings/1/2023-12-13",
+        undefined
+      );
+      expect(result).toHaveLength(2);
+      expect(result[0].vote).toBe("YES");
+      expect(result[1].vote).toBe("NO");
+    });
+
+    it("forwards options to http client", async () => {
+      const http = createMockHttp(mockVotesMp);
+      const mps = createMPsResource(http);
+      const options = { signal: new AbortController().signal };
+
+      await mps.getVotingsBySittingAndDate(95, 1, "2023-12-13", options);
+
+      expect(http.getResource).toHaveBeenCalledWith(
+        "MP/95/votings/1/2023-12-13",
+        options
+      );
     });
   });
 });

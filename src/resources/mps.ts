@@ -4,6 +4,7 @@ import type { components } from "../gen/openapi.js";
 
 export type MP = components["schemas"]["MP"];
 export type VotingStat = components["schemas"]["VotingStat"];
+export type VoteMP = components["schemas"]["VoteMP"];
 
 export type MPsResource = {
   /** GET /sejm/term{term}/MP */
@@ -12,6 +13,15 @@ export type MPsResource = {
   getById: (id: number, options?: RequestOptions) => Promise<MP>;
   /** GET /sejm/term{term}/MP/{id}/votings/stats */
   getVotingsStatistics: (id: number, options?: RequestOptions) => Promise<VotingStat[]>;
+  /** GET /sejm/term{term}/MP/{id}/votings/{sitting}/{date} 
+   * @param date - ISO date string, e.g. "2023-12-13"
+  */
+  getVotingsBySittingAndDate: (
+    id: number,
+    sitting: number,
+    date: string,
+    options?: RequestOptions,
+  ) => Promise<VoteMP[]>;
 };
 
 export const createMPsResource = (http: HttpClient): MPsResource => {
@@ -27,9 +37,14 @@ export const createMPsResource = (http: HttpClient): MPsResource => {
     return http.getResource<VotingStat[]>(`MP/${id}/votings/stats`, options);
   };
 
+  const getVotingsBySittingAndDate: MPsResource["getVotingsBySittingAndDate"] = (id, sitting, date, options) => {
+    return http.getResource<VoteMP[]>(`MP/${id}/votings/${sitting}/${date}`, options);
+  };
+
   return {
     getAll,
     getById,
     getVotingsStatistics,
+    getVotingsBySittingAndDate,
   };
 };
