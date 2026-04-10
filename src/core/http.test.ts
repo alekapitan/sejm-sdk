@@ -1,10 +1,11 @@
 import { createHttpClient } from "./http.js";
 
-const mockFetch = (body: unknown, options: { status?: number; contentType?: string } = {}) => {
-  const { status = 200, contentType = "application/json" } = options;
+const mockFetch = (body: unknown, options: { status?: number; contentType?: string; statusText?: string } = {}) => {
+  const { status = 200, contentType = "application/json", statusText = "OK" } = options;
   const fetchMock = vi.fn().mockResolvedValue({
     ok: status >= 200 && status < 300,
     status,
+    statusText,
     headers: { get: () => contentType },
     json: () => Promise.resolve(body),
     text: () => Promise.resolve(String(body)),
@@ -76,13 +77,15 @@ describe("createHttpClient", () => {
   });
 
   it("throws on non-ok response", async () => {
-    mockFetch({ message: "Not found" }, { status: 404 });
+    mockFetch({ message: "Not found" }, { status: 404, statusText: "Not Found" });
     const client = createHttpClient({
       baseUrl: "https://example.test/sejm",
       term: 10,
     });
 
-    await expect(client.getResource("MP/9999")).rejects.toThrow("failed with status 404");
+    await expect(client.getResource("MP/9999")).rejects.toThrow(
+      "Request failed 404 Not Found — https://example.test/sejm/term10/MP/9999",
+    );
   });
 
   it("returns text body when content-type is not JSON", async () => {
