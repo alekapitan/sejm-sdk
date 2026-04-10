@@ -1,4 +1,5 @@
-import { createMPsResource, MP } from "./mps.js";
+import { createMPsResource } from "./mps.js";
+import type { MP, VotingStat } from "./mps.js";
 import type { HttpClient } from "../core/http.js";
 
 const mockMPs: MP[] = [
@@ -42,6 +43,11 @@ const mockMPs: MP[] = [
   },
 ];
 
+const mockVotingStats: VotingStat[] = [
+  { sitting: 1, date: "2024-01-15", numVotings: 20, numVoted: 18, numMissed: 2, absenceExcuse: false },
+  { sitting: 2, date: "2024-02-10", numVotings: 15, numVoted: 15, numMissed: 0, absenceExcuse: false },
+];
+
 const createMockHttp = (returnValue: unknown): HttpClient => ({
   getResource: vi.fn().mockResolvedValue(returnValue),
 });
@@ -58,7 +64,6 @@ describe("createMPsResource", () => {
 
       expect(http.getResource).toHaveBeenCalledOnce();
       expect(http.getResource).toHaveBeenCalledWith("MP", undefined);
-
       expect(result).toHaveLength(2);
       expect(result[0].id).toBe(95);
       expect(result[1].club).toBe("KT");
@@ -86,6 +91,41 @@ describe("createMPsResource", () => {
       expect(http.getResource).toHaveBeenCalledWith("MP/95", undefined);
       expect(result.id).toBe(95);
       expect(result.firstLastName).toBe("Anna Kowalska");
+    });
+
+    it("forwards options to http client", async () => {
+      const http = createMockHttp(mockMPs[0]);
+      const mps = createMPsResource(http);
+      const options = { signal: new AbortController().signal };
+
+      await mps.getById(95, options);
+
+      expect(http.getResource).toHaveBeenCalledWith("MP/95", options);
+    });
+  });
+
+  describe("getVotingsStatistics", () => {
+    it("returns voting stats for an MP", async () => {
+      const http = createMockHttp(mockVotingStats);
+      const mps = createMPsResource(http);
+
+      const result = await mps.getVotingsStatistics(95);
+
+      expect(http.getResource).toHaveBeenCalledOnce();
+      expect(http.getResource).toHaveBeenCalledWith("MP/95/votings/stats", undefined);
+      expect(result).toHaveLength(2);
+      expect(result[0].sitting).toBe(1);
+      expect(result[1].numMissed).toBe(0);
+    });
+
+    it("forwards options to http client", async () => {
+      const http = createMockHttp(mockVotingStats);
+      const mps = createMPsResource(http);
+      const options = { signal: new AbortController().signal };
+
+      await mps.getVotingsStatistics(95, options);
+
+      expect(http.getResource).toHaveBeenCalledWith("MP/95/votings/stats", options);
     });
   });
 });
